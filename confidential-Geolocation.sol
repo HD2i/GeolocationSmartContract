@@ -22,17 +22,22 @@ contract Geolocation {
     // Participant Post Methods
     ************************/
 
+    /// @notice Posts location of msg.sender as a participant 
+    /// @param _dateTime Unix time participant was at location
+    /// @param _lat Latitude of the participant rounded to the nearest 4 decimal degrees and multiplied by 10^4
+    /// @param _long Longitude of the participant rounded to the nearest 4 decimal degrees and multiplied by 10^4
     function postParticipantLocation(uint256 _dateTime, int256 _lat, int256 _long) public {
-        bytes32 curLoc = keccak256(abi.encodePacked(_lat, _long));
-        // Check if user is new
-        if (addressToParticipantID[msg.sender] == 0) {
-            numberOfParticipants ++;
-            addressToParticipantID[msg.sender] = numberOfParticipants;
-            sharingEnabled[numberOfParticipants] = true;
+
+        if (addressToParticipantID[msg.sender] == 0) {                  // Check if msg.sender is a new Participant             
+            numberOfParticipants ++;                                    // Increment total number of participants
+            addressToParticipantID[msg.sender] = numberOfParticipants;  // Assign the new participant a new ParticipantID
+            sharingEnabled[numberOfParticipants] = true;                // Enable sharing of data 
         }
-        uint256 participantID = addressToParticipantID[msg.sender];
-        participantCoordinates[participantID][_dateTime] = curLoc;
-        participantDateTimes[participantID].push(_dateTime);
+        
+        uint256 participantID = addressToParticipantID[msg.sender];     // Get ParticipantID
+        bytes32 curLoc = keccak256(abi.encodePacked(_lat, _long));      // Create a hash of the latitude and longitude
+        participantCoordinates[participantID][_dateTime] = curLoc;      // Map geolocation hash to dateTime of ParticpantID
+        participantDateTimes[participantID].push(_dateTime);            // Append new dateTime to PaticipantID
     }
     
     function postParticipantSharingPreference() public {
